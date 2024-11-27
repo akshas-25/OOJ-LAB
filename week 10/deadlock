@@ -1,0 +1,59 @@
+class SharedResource {
+    private int data;
+    private boolean isDataAvailable = false;
+
+    // Producer thread
+    public synchronized void produceData(int data) throws InterruptedException {
+        while (isDataAvailable) {
+            wait();  // Wait if data is already available
+        }
+        this.data = data;
+        System.out.println("Put: " + data);
+        isDataAvailable = true;
+        notify();  // Notify consumer thread that data is available
+    }
+
+    // Consumer thread
+    public synchronized void consumeData() throws InterruptedException {
+        while (!isDataAvailable) {
+            wait();  // Wait if no data is available
+        }
+        System.out.println("Get: " + data);
+        isDataAvailable = false;
+        notify();  // Notify producer thread that data is consumed
+    }
+}
+
+public class IPCDemo {
+    public static void main(String[] args) {
+        SharedResource sharedResource = new SharedResource();
+
+        // Producer thread
+        Thread producer = new Thread(() -> {
+            try {
+                for (int i = 0; i < 5; i++) {
+                    sharedResource.produceData(i);
+                    Thread.sleep(1000);  // Simulate some time taken to produce
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+
+        // Consumer thread
+        Thread consumer = new Thread(() -> {
+            try {
+                for (int i = 0; i < 5; i++) {
+                    sharedResource.consumeData();
+                    Thread.sleep(1500);  // Simulate some time taken to consume
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+
+        producer.start();
+        consumer.start();
+        System.out.println("aksha 1bm23cs019");
+    }
+}
